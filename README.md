@@ -5,7 +5,6 @@ This is a simple **Content-Based Movie Recommendation System** built using
 It recommends similar movies based on *genre similarity* using **Cosine Similarity**.
 
 ---
-
 ## 📁 Project Files
 
 | File | Description |
