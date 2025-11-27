@@ -33,12 +33,3 @@ It recommends similar movies based on *genre similarity* using **Cosine Similari
 | Pandas | Data handling |
 | NumPy | Numerical computation |
 | Scikit-Learn | Feature vectorization + Cosine similarity |
-
----
-
-## 📥 How to Run
-
-### **1️⃣ Upload Dataset in Google Colab**
-```python
-from google.colab import files
-uploaded = files.upload()
