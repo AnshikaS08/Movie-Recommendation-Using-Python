@@ -1,49 +1,72 @@
-# ----------------------------------------------
-# MOVIE RECOMMENDATION SYSTEM USING PYTHON
-# ----------------------------------------------
+# ===============================================================
+# 🎬 MOVIE RECOMMENDATION SYSTEM (Content Based Filtering)
+# Libraries: sklearn + pandas
+# Works directly in Jupyter Notebook (.ipynb)
+# No CSV required — sample dataset included
+# ===============================================================
 
 import pandas as pd
-import numpy as np
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-# Load dataset 
-df = pd.read_csv("movies.csv")
+# ---------------------------
+# SAMPLE DATA (Replace anytime)
+# ---------------------------
+movies = {
+    'title': ['Avatar','Titanic','John Wick','Avengers','Iron Man','The Notebook','La La Land','Deadpool'],
+    'genre' : ['Action Sci-Fi','Romance Drama','Action Thriller','Action Sci-Fi','Action Sci-Fi','Romance Drama','Romance Musical','Action Comedy'],
+    'overview': [
+        'A marine on an alien planet',
+        'A love story on the Titanic ship',
+        'Hitman takes revenge',
+        'Superheroes fight to save Earth',
+        'Billionaire becomes armored hero',
+        'Couple fall in love and face struggles',
+        'Jazz musician and actress fall in love',
+        'Funny superhero with guns and swords'
+    ]
+}
 
-# Select necessary columns
-df = df[['title','genres','keywords','cast','director']]
-df.dropna(inplace=True)
+df = pd.DataFrame(movies)
 
-# Create combined tags column
-df['tags'] = df['genres'] + " " + df['keywords'] + " " + df['cast'] + " " + df['director']
+# -----------------------------------
+# FEATURE COMBINATION FOR BETTER MATCH
+# -----------------------------------
+df['combined_features'] = df['genre'] + " " + df['overview']
 
-# Convert text → vectors using NLP
-cv = CountVectorizer(max_features=5000, stop_words='english')
-vectors = cv.fit_transform(df['tags']).toarray()
+# Convert text to vector
+cv = CountVectorizer(stop_words='english')
+vector = cv.fit_transform(df['combined_features'])
 
-# Calculate similarity score
-similarity = cosine_similarity(vectors)
+# Similarity score using cosine similarity
+similarity = cosine_similarity(vector)
 
-# Recommendation function
-def recommend(movie):
-    if movie not in df['title'].values:
-        print("⚠ Movie not found — check name again.\n")
+# ---------------------------------------------------
+# RECOMMENDER FUNCTION 🧠
+# input = movie name (string)
+# output = top 5 similar movies
+# ---------------------------------------------------
+def recommend(movie_name):
+    movie_name = movie_name.lower()
+    
+    # Find movie index safely
+    matches = df[df['title'].str.lower() == movie_name]
+    if matches.empty:
+        print("❌ Movie not found in database!")
         return
+    
+    index = matches.index[0]
+    
+    # Get similarity scores
+    distances = list(enumerate(similarity[index]))
+    movies_list = sorted(distances, key=lambda x: x[1], reverse=True)[1:6]
 
-    movie_index = df[df['title'] == movie].index[0]
-    distances = similarity[movie_index]
-
-    # top 5 similar movies (excluding itself)
-    movies_list = sorted(list(enumerate(distances)), reverse=True, key=lambda x:x[1])[1:6]
-
-    print(f"\n🎬 Recommended Movies for ➤ {movie}\n")
+    print(f"\n✨ Recommended movies similar to '{movie_name.title()}':\n")
     for i in movies_list:
-        print(" ➤", df.iloc[i[0]].title)
+        print("📌", df.iloc[i[0]].title)
 
-# ----------- RUN (Enter any movie to get recommendations) ----------
-
-print("\n🔹 Welcome to Movie Recommendation System 🔹")
-movie_name = input("\nEnter Movie Name: ")
-
-recommend(movie_name)
-print("\nDone ✔")
+# ---------------------------
+# Try it
+# ---------------------------
+recommend("Avatar")
+recommend("Titanic")
